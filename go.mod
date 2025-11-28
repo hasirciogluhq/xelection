@@ -1,3 +1,3 @@
-module github.com/hasirciogluhq/xelection-go
+module github.com/hasirciogluhq/xelection
 
 go 1.25.1

@@ -3,7 +3,7 @@ package packet
 import (
 	"errors"
 
-	"github.com/hasirciogluhq/xelection-go/pkg/utils"
+	"github.com/hasirciogluhq/xelection/pkg/utils"
 )
 
 type Packet struct {
