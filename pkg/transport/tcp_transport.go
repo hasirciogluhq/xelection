@@ -124,7 +124,7 @@ func (ttl *TCPTransport) HandleTCPConnection(conn net.Conn, direction ClientConn
 	transportClient := NewTransportClient(tcpClient, ClientConnectionDirectionIncoming)
 	transportClient.SetAuthenticated(false)
 	ttl.dispatcher.onConnected(transportClient, conn)
-	logger.Info("%s: client connected to server [clientID=%s, remoteAddr=%s]", context, transportClient.ID, conn.RemoteAddr())
+	logger.Info("%s: client connected to server [clientID=%d, remoteAddr=%s]", context, transportClient.ID, conn.RemoteAddr())
 
 	// Read loop
 	go func() {
@@ -138,7 +138,7 @@ func (ttl *TCPTransport) readLoop(conn net.Conn, client *Client, loopContext str
 	defer func() {
 		ttl.dispatcher.onDisconnected(client, conn)
 		conn.Close()
-		logger.Info("tcp-server: client disconnected [clientID=%s]", client.ID)
+		logger.Info("tcp-server: client disconnected [clientID=%d]", client.ID)
 	}()
 
 	// Set TCP keep-alive - OS level mechanism that sends keep-alive packets
@@ -168,25 +168,25 @@ func (ttl *TCPTransport) readLoop(conn net.Conn, client *Client, loopContext str
 				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 					// Timeout - connection might still be alive, just no data
 					// Reset deadline and continue
-					logger.Debug("%s: read timeout (connection still alive) [clientID=%s]", loopContext, client.ID)
+					logger.Debug("%s: read timeout (connection still alive) [clientID=%d]", loopContext, client.ID)
 					continue
 				}
 
 				if err == io.EOF {
-					logger.Debug("%s: client disconnected [clientID=%s]", loopContext, client.ID)
+					logger.Debug("%s: client disconnected [clientID=%d]", loopContext, client.ID)
 				} else if strings.Contains(err.Error(), "use of closed network connection") {
 					return
 				} else if err == net.ErrClosed {
 					logger.Debug("Read from closed conn")
 				} else {
-					logger.Warn("%s: failed to read length [clientID=%s, error=%v]", loopContext, client.ID, err)
+					logger.Warn("%s: failed to read length [clientID=%d, error=%v]", loopContext, client.ID, err)
 				}
 				return
 			}
 
 			// Validate length (max 10MB)
 			if length > 10*1024*1024 {
-				logger.Warn("%s: packet too large [clientID=%s, length=%d]", loopContext, client.ID, length)
+				logger.Warn("%s: packet too large [clientID=%d, length=%d]", loopContext, client.ID, length)
 				break
 			}
 
@@ -195,10 +195,10 @@ func (ttl *TCPTransport) readLoop(conn net.Conn, client *Client, loopContext str
 			data := make([]byte, length)
 			if _, err := io.ReadFull(conn, data); err != nil {
 				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-					logger.Debug("%s: read timeout while reading packet data [clientID=%s]", loopContext, client.ID)
+					logger.Debug("%s: read timeout while reading packet data [clientID=%d]", loopContext, client.ID)
 					continue
 				}
-				logger.Warn("%s: failed to read packet data [clientID=%s, error=%v]", loopContext, client.ID, err)
+				logger.Warn("%s: failed to read packet data [clientID=%d, error=%v]", loopContext, client.ID, err)
 				break
 			}
 

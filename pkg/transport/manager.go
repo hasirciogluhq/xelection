@@ -35,7 +35,7 @@ func (tm *TransportManager) onConnected(client *Client, conn interface{}) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
 	tm.Clients[client.ID] = client
-	logger.Info("transport: client registered [id=%s]", client.ID)
+	logger.Info("transport: client registered [id=%d]", client.ID)
 
 	// Notify handler about connection
 	for _, handler := range tm.handlers {
@@ -84,7 +84,7 @@ func (tm *TransportManager) onDisconnected(client *Client, conn interface{}) {
 	tm.mu.Unlock()
 
 	if exists {
-		logger.Info("transport: client unregistered [id=%s]", client.ID)
+		logger.Info("transport: client unregistered [id=%d]", client.ID)
 		// Notify handler about disconnection
 		for _, handler := range tm.handlers {
 			if handler != nil {
@@ -103,7 +103,7 @@ func (tm *TransportManager) SendData(client *Client, packet *packets.Packet) err
 	tm.mu.RUnlock()
 
 	if !exists {
-		logger.Warn("transport: client not found [clientID=%s]", client.ID)
+		logger.Warn("transport: client not found [clientID=%d]", client.ID)
 		return ErrClientNotFound
 	}
 
@@ -111,20 +111,20 @@ func (tm *TransportManager) SendData(client *Client, packet *packets.Packet) err
 	if sender, ok := client.TransportData.(Sender); ok {
 		data := packet.ToBytes()
 		if data == nil {
-			logger.Error("transport: failed to serialize packet [clientID=%s, packetID=%s, packetAction=%s]", client.ID, packet.ID, packet.GetAction())
+			logger.Error("transport: failed to serialize packet [clientID=%d, packetID=%d, packetAction=%s]", client.ID, packet.ID, packet.GetAction())
 			return fmt.Errorf("failed to serialize packet")
 		}
-		logger.Debug("transport: sending packet [clientID=%s, packetID=%s, action=%s, size=%d]",
+		logger.Debug("transport: sending packet [clientID=%d, packetID=%d, action=%s, size=%d]",
 			client.ID, packet.ID, packet.GetAction(), len(data))
 		if err := sender.Send(data); err != nil {
-			logger.Warn("transport: failed to send packet [clientID=%s, error=%v]", client.ID, err)
+			logger.Warn("transport: failed to send packet [clientID=%d, error=%v]", client.ID, err)
 			return err
 		}
-		logger.Debug("transport: packet sent successfully [clientID=%s, packetID=%s]", client.ID, packet.ID)
+		logger.Debug("transport: packet sent successfully [clientID=%d, packetID=%d]", client.ID, packet.ID)
 		return nil
 	}
 
-	logger.Error("transport: client transport does not support sending [clientID=%s, transportType=%T]", client.ID, client.TransportData)
+	logger.Error("transport: client transport does not support sending [clientID=%d, transportType=%T]", client.ID, client.TransportData)
 	return fmt.Errorf("client transport does not support sending")
 }
 
